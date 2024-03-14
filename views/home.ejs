@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apex Chat</title>
+    <link href="/css/home.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <h1>Real Time Messaging</h1>
+    <pre id="messages" style="height: 400px; overflow: scroll"></pre>
+    <input
+      type="text"
+      id="messageBox"
+      placeholder="Type your message here"
+      style="display: block; width: 100%; margin-bottom: 10px; padding: 10px"
+    />
+    <button id="send" title="Send Message!" style="width: 100%; height: 30px">
+      Send Message
+    </button>
+
+    <script src="/socket.io/socket.io.js"></script>
+   <script>
+  (function () {
+    const sendBtn = document.querySelector("#send");
+    const messages = document.querySelector("#messages");
+    const messageBox = document.querySelector("#messageBox");
+
+    let socket;
+
+    function showMessage(message, isSender) {
+      if (!isSender) {
+        messages.textContent += `\n\n${message}`;
+        messages.scrollTop = messages.scrollHeight;
+      }
+      messageBox.value = "";
+    }
+
+    function init() {
+      if (socket) {
+        socket.disconnect();
+      }
+
+      socket = io();
+      socket.on("connect", () => {
+        console.log("Connected to server!");
+      });
+      socket.on("message", (data) => {
+        showMessage(data, false); 
+      });
+    }
+
+    sendBtn.onclick = function () {
+      if (!socket) {
+        showMessage("No WebSocket connection :(", true); 
+        return;
+      }
+
+      const message = messageBox.value;
+      socket.send(message);
+      showMessage(message, true);
+    };
+
+    init();
+  })();
+</script>
+
+  </body>
+</html>
